@@ -10,12 +10,16 @@
 
 COLOR1=${PROMPT_LEAN_COLOR1-"241"}
 COLOR2=${PROMPT_LEAN_COLOR2-"140"}
+COLOR3=${PROMPT_LEAN_COLOR3-"140"}
 
 PROMPT_LEAN_TMUX=${PROMPT_LEAN_TMUX-"t "}
 PROMPT_LEAN_PATH_PERCENT=${PROMPT_LEAN_PATH_PERCENT-60}
 PROMPT_LEAN_NOTITLE=${PROMPT_LEAN_NOTITLE-0}
+PROMPT_LEAN_PATH_SED=${PROMPT_LEAN_PATH_SED-"s///g"}
 
 PROMPT_LEAN_SYMBOL=${PROMPT_LEAN_SYMBOL-'%'}
+PROMPT_LEAN_GIT_SYMBOL=${PROMPT_LEAN_GIT_SYMBOL-''}
+PROMPT_LEAN_GIT_STYLE=${PROMPT_LEAN_GIT_STYLE-'SIMPLE'}
 
 prompt_lean_help() {
   cat <<'EOF'
@@ -59,6 +63,29 @@ prompt_lean_human_time() {
     echo "${seconds}s "
 }
 
+prompt_lean_git_fat() {
+  local ref dirty mode repo_path git_prompt
+  repo_path=$(git rev-parse --git-dir 2>/dev/null)
+
+  ZSH_THEME_GIT_PROMPT_SUFFIX=""
+  ZSH_THEME_GIT_PROMPT_PREFIX="${PROMPT_LEAN_GIT_SYMBOL}"
+  ZSH_THEME_GIT_PROMPT_DIRTY="%F{red} ✘%F{black}"
+  ZSH_THEME_GIT_PROMPT_CLEAN="%F{green} ✔%F{black}"
+  ZSH_THEME_GIT_PROMPT_ADDED="%F{green} ✚%F{black}"
+  ZSH_THEME_GIT_PROMPT_MODIFIED="%F{magenta} ✹%F{black}"
+  ZSH_THEME_GIT_PROMPT_UNTRACKED="%F{yellow} ✭%F{black}"
+  ZSH_THEME_GIT_PROMPT_RENAMED="%F{15} ➜"
+  ZSH_THEME_GIT_PROMPT_UNMERGED="%F{15} ═"
+  ZSH_THEME_GIT_PROMPT_AHEAD="%F{15} ⬆"
+  ZSH_THEME_GIT_PROMPT_BEHIND="%F{15} ⬇"
+  ZSH_THEME_GIT_PROMPT_DIVERGED="%F{15} ⬍"
+  GIT_CMD="\$(git_prompt_info)"
+  eval git_prompt=${GIT_CMD}
+  if $(git rev-parse --is-inside-work-tree >/dev/null 2>&1); then
+    echo -n ${git_prompt}$(git_prompt_status)
+  fi
+}
+
 # fastest possible way to check if repo is dirty
 prompt_lean_git_dirty() {
     # check if we're in a git repo
@@ -99,7 +126,7 @@ prompt_lean_pwd() {
         print -Pn '...%2/'
         return
     fi
-    print "$lean_path"
+    print "$lean_path" | sed "${PROMPT_LEAN_PATH_SED}"
 }
 
 prompt_lean_precmd() {
@@ -125,8 +152,12 @@ prompt_lean_precmd() {
 
     setopt promptsubst
     local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
-    PROMPT="$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%B%F{red})${PROMPT_LEAN_SYMBOL}%f%b "
-    RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$vcs_info_str`prompt_lean_git_dirty`$prompt_lean_host%f`$PROMPT_LEAN_RIGHT`%f"
+    PROMPT="`prompt_lean_current`$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%B%F{red})%F{"$COLOR3"}${PROMPT_LEAN_SYMBOL}%f%b "
+    if [ "$PROMPT_LEAN_GIT_STYLE" = 'SIMPLE' ]; then
+RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$vcs_info_str`prompt_lean_git_dirty`$prompt_lean_host%f`$PROMPT_LEAN_RIGHT`%f"
+    else
+        RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR1"}`prompt_lean_git_fat`%f  $prompt_lean_host%F{"$COLOR2"}`prompt_lean_pwd`%f`$PROMPT_LEAN_RIGHT`%f"
+    fi
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
 }

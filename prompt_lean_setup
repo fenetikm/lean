@@ -20,6 +20,7 @@ PROMPT_LEAN_PATH_SED=${PROMPT_LEAN_PATH_SED-"s///g"}
 PROMPT_LEAN_SYMBOL=${PROMPT_LEAN_SYMBOL-'%'}
 PROMPT_LEAN_GIT_SYMBOL=${PROMPT_LEAN_GIT_SYMBOL-''}
 PROMPT_LEAN_GIT_STYLE=${PROMPT_LEAN_GIT_STYLE-'SIMPLE'}
+PROMPT_LEAN_SEP=${PROMPT_LEAN_SEP-''}
 
 prompt_lean_help() {
   cat <<'EOF'
@@ -70,10 +71,10 @@ prompt_lean_git_fat() {
   ZSH_THEME_GIT_PROMPT_SUFFIX=""
   ZSH_THEME_GIT_PROMPT_PREFIX="${PROMPT_LEAN_GIT_SYMBOL}"
   ZSH_THEME_GIT_PROMPT_DIRTY="%F{red} ✗"
-  ZSH_THEME_GIT_PROMPT_CLEAN="%F{green} ✓"
+  ZSH_THEME_GIT_PROMPT_CLEAN="%F{10} ✓"
   ZSH_THEME_GIT_PROMPT_ADDED="%F{green} ✚"
   ZSH_THEME_GIT_PROMPT_MODIFIED="%F{yellow} ~"
-  ZSH_THEME_GIT_PROMPT_UNTRACKED="%F{yellow} \uf1a4"
+  ZSH_THEME_GIT_PROMPT_UNTRACKED="%F{yellow} ?"
   ZSH_THEME_GIT_PROMPT_RENAMED="%F{15} ➜"
   ZSH_THEME_GIT_PROMPT_UNMERGED="%F{15} ═"
   ZSH_THEME_GIT_PROMPT_AHEAD="%F{15} ⬆"
@@ -152,10 +153,12 @@ prompt_lean_precmd() {
 
     setopt promptsubst
     local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
-    PROMPT="$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%B%F{red})%F{"$COLOR3"}${PROMPT_LEAN_SYMBOL}%f%b "
+    PROMPT="$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{red})%K{"$COLOR3"}%F{"0"} ${PROMPT_LEAN_SYMBOL}%K%F{"$COLOR3"}${PROMPT_LEAN_SEP}%f%b "
     if [ "$PROMPT_LEAN_GIT_STYLE" = 'SIMPLE' ]; then
+        # simple style
 RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$vcs_info_str`prompt_lean_git_dirty`$prompt_lean_host%f`$PROMPT_LEAN_RIGHT`%f"
     else
+        # fat style
         RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR1"}`prompt_lean_git_fat`%f  $prompt_lean_host%F{"$COLOR2"}`prompt_lean_pwd`%f`$PROMPT_LEAN_RIGHT`%f"
     fi
 

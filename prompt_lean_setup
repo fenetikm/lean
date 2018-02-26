@@ -12,6 +12,8 @@ COLOR1=${PROMPT_LEAN_COLOR1-"241"}
 COLOR2=${PROMPT_LEAN_COLOR2-"140"}
 COLOR3=${PROMPT_LEAN_COLOR3-"140"}
 
+PROMPT_LEAN_FG=${PROMPT_LEAN_FG-""}
+
 PROMPT_LEAN_TMUX=${PROMPT_LEAN_TMUX-"t "}
 PROMPT_LEAN_PATH_PERCENT=${PROMPT_LEAN_PATH_PERCENT-60}
 PROMPT_LEAN_NOTITLE=${PROMPT_LEAN_NOTITLE-0}
@@ -20,7 +22,7 @@ PROMPT_LEAN_PATH_SED=${PROMPT_LEAN_PATH_SED-"s///g"}
 PROMPT_LEAN_SYMBOL=${PROMPT_LEAN_SYMBOL-'%'}
 PROMPT_LEAN_GIT_SYMBOL=${PROMPT_LEAN_GIT_SYMBOL-''}
 PROMPT_LEAN_GIT_STYLE=${PROMPT_LEAN_GIT_STYLE-'SIMPLE'}
-PROMPT_LEAN_SEP=${PROMPT_LEAN_SEP-''}
+PROMPT_LEAN_SEP=${PROMPT_LEAN_SEP-''}
 
 prompt_lean_help() {
   cat <<'EOF'
@@ -153,7 +155,7 @@ prompt_lean_precmd() {
 
     setopt promptsubst
     local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
-    PROMPT="$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{red})%K{"$COLOR3"}%F{"0"} ${PROMPT_LEAN_SYMBOL}%K%F{"$COLOR3"}${PROMPT_LEAN_SEP}%f%b "
+    PROMPT="$prompt_lean_jobs%F{yellow}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{red})%K{"$COLOR3"}%F{"0"} ${PROMPT_LEAN_SYMBOL}%K%F{"$COLOR3"}${PROMPT_LEAN_SEP}%f%b $PROMPT_LEAN_FG"
     if [ "$PROMPT_LEAN_GIT_STYLE" = 'SIMPLE' ]; then
         # simple style
 RPROMPT="%F{yellow}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$vcs_info_str`prompt_lean_git_dirty`$prompt_lean_host%f`$PROMPT_LEAN_RIGHT`%f"
